@@ -5,11 +5,12 @@
 #include "string.h"
 
 //According to your need to modify the constants.
-#define TICKS_INTERVAL    5 //ms
-#define DEBOUNCE_TICKS    3 //MAX 8
+#define TICKS_INTERVAL    100 //ms
+#define DEBOUNCE_TICKS    0   //MAX 8
 #define SHORT_TICKS       (300  / TICKS_INTERVAL)
 #define LONG_TICKS        (1000 / TICKS_INTERVAL)
-#define LONG_HOLD_CYC     (500 / TICKS_INTERVAL)
+
+#define BUTTON_NAME_MAX   8
 
 typedef void (*BtnCallback)(void*);
 
@@ -26,6 +27,7 @@ typedef enum {
 }PressEvent;
 
 typedef struct button {
+    char     name[BUTTON_NAME_MAX];
     uint16_t ticks;
     uint8_t  repeat       : 4;
     uint8_t  event        : 4;
@@ -42,12 +44,14 @@ typedef struct button {
 extern "C" {  
 #endif  
 
-void button_init(struct button* handle, uint8_t(*pin_level)(void), uint8_t active_level);
+void button_init(struct button* handle, char* name, uint8_t(*pin_level)(void), uint8_t active_level);
 void button_attach(struct button* handle, PressEvent event, BtnCallback cb);
 PressEvent get_button_event(struct button* handle);
 int  button_start(struct button* handle);
 void button_stop(struct button* handle);
 void button_ticks(void);
+struct button* button_create(char* name, uint8_t(*pin_level)(void), uint8_t active_level);
+struct button* find_button_by_name(char* name);
 
 #ifdef __cplusplus
 } 

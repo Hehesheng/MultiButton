@@ -29,9 +29,10 @@ static struct button* head_handle = NULL;
   * @param  active_level: pin pressed level.
   * @retval None
   */
-void button_init(struct button* handle, uint8_t(*pin_level)(void), uint8_t active_level)
+void button_init(struct button* handle, char* name, uint8_t(*pin_level)(void), uint8_t active_level)
 {
     memset(handle, 0, sizeof(struct button));
+    strncpy(handle->name, name, BUTTON_NAME_MAX);
     handle->event = (uint8_t)NONE_PRESS;
     handle->hal_button_Level = pin_level;
     handle->button_level = handle->hal_button_Level();
@@ -178,10 +179,7 @@ void button_handler(struct button* handle)
         if(handle->button_level == handle->active_level) 
         {
             handle->event = (uint8_t)LONG_PRESS_HOLD;
-            if (handle->ticks % LONG_HOLD_CYC == 0)
-            {
-                EVENT_CB(LONG_PRESS_HOLD);
-            }
+            EVENT_CB(LONG_PRESS_HOLD);
         } 
         else 
         {
@@ -256,4 +254,29 @@ void button_ticks(void)
     {
         button_handler(target);
     }
+}
+
+#include <rtthread.h>
+struct button* button_create(char* name, uint8_t(*pin_level)(void), uint8_t active_level)
+{
+    button* btn;
+
+    btn = rt_malloc(sizeof(button));
+    if (!btn) return btn;
+    button_init(btn, name, pin_level, active_level);
+    button_start(btn);
+
+    return btn;
+}
+
+struct button* find_button_by_name(char* name)
+{
+    struct button* target;
+    
+    for(target = head_handle; target != NULL; target = target->next)
+    {
+        if (strncmp(target->name, name, BUTTON_NAME_MAX) == 0) return target;
+    }
+
+    return NULL;
 }
