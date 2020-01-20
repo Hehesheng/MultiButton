@@ -29,7 +29,7 @@ static struct button* head_handle = NULL;
   * @param  active_level: pin pressed level.
   * @retval None
   */
-void button_init(struct button* handle, char* name, uint8_t(*pin_level)(void*), uint8_t active_level)
+void button_init(struct button* handle, char* name, uint8_t(*pin_level)(button*), uint8_t active_level)
 {
     memset(handle, 0, sizeof(struct button));
     strncpy(handle->name, name, BUTTON_NAME_MAX);
@@ -257,7 +257,7 @@ void button_ticks(void)
 }
 
 #include <rtthread.h>
-struct button* button_create(char* name, uint8_t(*pin_level)(void*), uint8_t active_level)
+struct button* button_create(char* name, uint8_t(*pin_level)(button*), uint8_t active_level)
 {
     button* btn;
 
