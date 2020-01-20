@@ -29,13 +29,13 @@ static struct button* head_handle = NULL;
   * @param  active_level: pin pressed level.
   * @retval None
   */
-void button_init(struct button* handle, char* name, uint8_t(*pin_level)(void), uint8_t active_level)
+void button_init(struct button* handle, char* name, uint8_t(*pin_level)(void*), uint8_t active_level)
 {
     memset(handle, 0, sizeof(struct button));
     strncpy(handle->name, name, BUTTON_NAME_MAX);
     handle->event = (uint8_t)NONE_PRESS;
     handle->hal_button_Level = pin_level;
-    handle->button_level = handle->hal_button_Level();
+    handle->button_level = handle->hal_button_Level(handle);
     handle->active_level = active_level;
 }
 
@@ -68,7 +68,7 @@ PressEvent get_button_event(struct button* handle)
   */
 void button_handler(struct button* handle)
 {
-    uint8_t read_gpio_level = handle->hal_button_Level();
+    uint8_t read_gpio_level = handle->hal_button_Level(handle);
 
     //ticks counter working..
     if((handle->state) > 0) 
@@ -257,7 +257,7 @@ void button_ticks(void)
 }
 
 #include <rtthread.h>
-struct button* button_create(char* name, uint8_t(*pin_level)(void), uint8_t active_level)
+struct button* button_create(char* name, uint8_t(*pin_level)(void*), uint8_t active_level)
 {
     button* btn;
 
